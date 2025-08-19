@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta para el color del tema en navegadores móviles -->
+    <meta name="theme-color" content="#FDF4F0">
+    <title>Bakesuki - Postres Artesanales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Lobster&family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos personalizados para que coincida con la marca Bakesuki */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDF4F0; /* Color de fondo de respaldo */
+            /* Fondo con tu imagen personalizada */
+            background-image: url('imagenes/sweet.jpg');
+            /* Ajuste para que la imagen se repita como un patrón */
+            background-size: 300px;
+        }
+        .font-lobster {
+            font-family: 'Lobster', cursive;
+        }
+        .font-mono {
+            font-family: 'Source Code Pro', monospace;
+        }
+        .bakesuki-brand-text {
+            color: #6D2828; /* Marrón oscuro del logo */
+        }
+        .bakesuki-brand-bg {
+            background-color: #6D2828;
+        }
+        .bakesuki-accent-bg {
+            background-color: #F9EBE4; /* Color de fondo del logo */
+        }
+        .btn-primary {
+            background-color: #D98B99; /* Un rosa más fuerte para los botones */
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #C77583;
+        }
+        /* Animación para el carrito */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .pop-animation {
+            animation: pop 0.3s ease-out;
+        }
+
+        /* Estilos para el carrito tipo factura */
+        .receipt {
+            background-color: #fff;
+            border: 2px dashed #D98B99;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Estilo para nombre de producto con scroll en el carrito */
+        .cart-item-name {
+            white-space: nowrap;
+            overflow-x: auto;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .cart-item-name::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        /* Controles de cantidad tipo "Pedidos Ya" */
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            background-color: #D98B99;
+            border-radius: 9999px; /* Forma de píldora */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: white;
+            font-weight: bold;
+        }
+        .quantity-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .quantity-btn:hover {
+            background-color: #C77583;
+            border-radius: 9999px;
+        }
+        .quantity-display {
+            padding: 0 8px;
+            font-size: 1rem; /* 16px */
+        }
+        /* Estilo para radio buttons de pago */
+        .payment-radio:checked {
+            background-color: #D98B99;
+            border-color: #D98B99;
+        }
+        .payment-radio:checked:hover {
+            background-color: #C77583;
+        }
+
+        /* Sección de Opiniones */
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+        }
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+        .star-rating label {
+            font-size: 2rem;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .star-rating input[type="radio"]:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #ffc700;
+        }
+        /* Estilos para las secciones desplegables */
+        .collapsible-wrapper {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .collapsible-wrapper.open {
+            max-height: 1000px; /* Un valor suficientemente grande */
+        }
+        /* Estilo para la notificación "Toast" */
+        .toast {
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .respuesta-card {
+            background-color: #FDF4F0;
+            border-left: 4px solid #D98B99;
+        }
+        /* Estilo para productos agotados */
+        .grayscale {
+            filter: grayscale(100%);
+        }
+        /* Animación de vuelo al carrito */
+        .fly-to-cart {
+            position: fixed;
+            z-index: 100;
+            transition: all 0.7s ease-in-out;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+<!-- Contenedor principal -->
+<div class="container mx-auto p-4 md:p-8">
+
+    <!-- Encabezado con el logo y nombre de la empresa -->
+    <header class="text-center mb-12">
+        <!-- FOTO DEL LOGO: Ruta a tu imagen local -->
+        <img src="imagenes/logo.jpg" alt="Logo de Bakesuki" class="w-40 h-40 mx-auto rounded-full shadow-lg mb-4"
+             onerror="this.onerror=null;this.src='https://placehold.co/160x160/FDF4F0/6D2828?text=Bakesuki';">
+        <h1 class="text-4xl md:text-5xl font-bold bakesuki-brand-text tracking-widest uppercase">B a k e s u k i</h1>
+        <p class="text-xl text-gray-500 mt-2">Postres hechos con amor ♡</p>
+    </header>
+
+    <!-- Sección de productos -->
+    <main>
+        <h2 class="text-3xl font-bold text-center bakesuki-brand-text mb-8">Nuestros Productos</h2>
+        <div id="productos-contenedor" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Las tarjetas de productos se cargarán aquí desde Supabase -->
+        </div>
+    </main>
+
+    <!-- SECCIÓN: Opiniones y Sugerencias -->
+    <section class="mt-16">
+        <h2 class="text-3xl font-bold text-center bakesuki-brand-text mb-8">Opiniones y Sugerencias</h2>
+
+        <div class="max-w-xl mx-auto space-y-4">
+            <!-- Botón para dejar opinión -->
+            <div class="text-center">
+                <button id="dejar-opinion-btn" class="btn-primary font-semibold py-2 px-6 rounded-lg transition">
+                    Deja tu Comentario ♡
+                </button>
+            </div>
+
+            <!-- Formulario desplegable para dejar opinión -->
+            <div id="formulario-wrapper" class="collapsible-wrapper">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <form id="formulario-opinion">
+                        <div class="mb-4">
+                            <label for="nombre-opinion" class="block text-sm font-medium text-gray-700">Tu Nombre</label>
+                            <input type="text" id="nombre-opinion" name="nombre" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500">
+                        </div>
+                        <div class="mb-4 text-center">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tu Calificación</label>
+                            <div class="star-rating">
+                                <input type="radio" id="star5" name="rating" value="5" required><label for="star5" title="5 estrellas">★</label>
+                                <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 estrellas">★</label>
+                                <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 estrellas">★</label>
+                                <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 estrellas">★</label>
+                                <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="1 estrella">★</label>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="mensaje-opinion" class="block text-sm font-medium text-gray-700">Tu Mensaje</label>
+                            <textarea id="mensaje-opinion" name="mensaje" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"></textarea>
+                        </div>
+                        <button type="submit" id="enviar-opinion-btn" class="w-full btn-primary font-bold py-2 px-4 rounded-lg">Enviar Comentario</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Botón para mostrar/ocultar opiniones -->
+            <div class="text-center">
+                <button id="ver-opiniones-btn" class="bakesuki-brand-text font-semibold py-2 px-4 rounded-lg border-2 border-pink-300 hover:bg-pink-100 transition">
+                    Ver Opiniones
+                </button>
+            </div>
+
+            <!-- Contenedor desplegable de opiniones -->
+            <div id="opiniones-wrapper" class="collapsible-wrapper">
+                <div id="opiniones-contenedor" class="space-y-6">
+                    <!-- Las opiniones se cargarán aquí desde Supabase -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pie de página con redes sociales -->
+    <footer class="text-center mt-16">
+        <h3 class="text-2xl font-semibold bakesuki-brand-text mb-4">¡Síguenos en nuestras redes!</h3>
+        <div class="flex justify-center space-x-6">
+            <!-- Enlace a Instagram -->
+            <a href="https://www.instagram.com/bakesuki/profilecard/?igsh=MXZwYm11M2ZnamZhbQ==" target="_blank" class="text-gray-500 hover:bakesuki-brand-text transition-colors">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.08 2.525c.636-.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7.177a4.823 4.823 0 100 9.646 4.823 4.823 0 000-9.646zm0 7.661a2.838 2.838 0 110-5.676 2.838 2.838 0 010 5.676zm5.25-7.42a1.238 1.238 0 100-2.475 1.238 1.238 0 000 2.475z" clip-rule="evenodd" /></svg>
+            </a>
+            <!-- Enlace a WhatsApp -->
+            <a href="https://api.whatsapp.com/send?phone=595991894860" target="_blank" class="text-gray-500 hover:bakesuki-brand-text transition-colors">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91s-4.45-9.91-9.91-9.91zM12.04 20.15h-.01c-1.48 0-2.93-.4-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31c-.82-1.31-1.26-2.83-1.26-4.41 0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42s2.42 3.62 2.42 5.82c0 4.54-3.7 8.24-8.24 8.24zm4.52-6.13c-.25-.12-1.47-.72-1.7-.82s-.39-.12-.56.12c-.17.25-.64.82-.79.98s-.29.17-.54.06c-.25-.12-1.06-.39-2.02-1.25-.75-.67-1.25-1.5-1.4-1.75s-.12-.38.06-.5c.16-.16.35-.42.53-.64.18-.21.24-.35.35-.59.12-.24.06-.45-.03-.56s-.56-1.34-.76-1.84c-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.45.06-.68.3s-.89.86-.89 2.1c0 1.24.91 2.44 1.03 2.6s1.76 2.68 4.27 3.78c.6.25 1.07.4 1.22.52.3.21.57.18.78.11.24-.09.75-.62.91-.82.17-.21.17-.38.12-.5z"/></svg>
+            </a>
+        </div>
+        <p class="text-gray-400 mt-8 text-sm">&copy; 2025 Bakesuki. Todos los derechos reservados.</p>
+    </footer>
+
+</div>
+
+<!-- Botón flotante del carrito -->
+<div id="carrito-flotante" class="fixed bottom-6 right-6 cursor-pointer">
+    <div class="relative">
+        <div id="carrito-icono" class="w-16 h-16 rounded-full bakesuki-brand-bg shadow-xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        </div>
+        <span id="carrito-contador" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center hidden">0</span>
+    </div>
+</div>
+
+<!-- Modal del Carrito -->
+<div id="carrito-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+    <div class="receipt rounded-2xl w-full max-w-sm transform transition-all duration-300 scale-95 opacity-0" id="modal-contenido">
+        <button id="cerrar-modal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-500 hover:text-gray-800 shadow-md">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="text-center">
+            <h2 class="text-3xl font-lobster bakesuki-brand-text">Bakesuki</h2>
+            <p class="text-sm text-gray-500">Comprobante de Pedido</p>
+        </div>
+
+        <!-- Campo para el nombre del cliente -->
+        <div class="my-4">
+            <input type="text" id="nombre-cliente" name="nombre-cliente" required class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500 text-sm" placeholder="Tu Nombre para el Pedido">
+        </div>
+
+        <div class="border-t border-b border-dashed border-gray-300 py-4" id="carrito-items-container">
+            <div id="carrito-items" class="space-y-3 max-h-48 overflow-y-auto pr-2">
+                <!-- Items del carrito se insertarán aquí -->
+            </div>
+            <div id="carrito-vacio" class="text-center text-gray-500 py-8">
+                <p>Tu carrito está vacío.</p>
+            </div>
+        </div>
+
+        <!-- Sección de Método de Pago -->
+        <div class="my-4">
+            <h3 class="font-bold text-center bakesuki-brand-text mb-2">Método de Pago</h3>
+            <div id="payment-options" class="flex justify-center space-x-4 font-mono text-sm">
+                <label for="pago-efectivo" class="flex items-center space-x-2 cursor-pointer">
+                    <input type="radio" id="pago-efectivo" name="metodo-pago" value="Efectivo" class="payment-radio text-pink-500 focus:ring-pink-500" checked>
+                    <span>Efectivo</span>
+                </label>
+                <label for="pago-transferencia" class="flex items-center space-x-2 cursor-pointer">
+                    <input type="radio" id="pago-transferencia" name="metodo-pago" value="Transferencia" class="payment-radio text-pink-500 focus:ring-pink-500">
+                    <span>Transferencia</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="space-y-2 font-mono">
+            <div class="flex justify-between font-bold text-lg bakesuki-brand-text">
+                <span>TOTAL</span>
+                <span id="carrito-total">0 Gs.</span>
+            </div>
+        </div>
+
+        <div class="text-center mt-6">
+            <p class="text-xs text-gray-400">¡Gracias por tu compra!</p>
+        </div>
+
+        <button id="realizar-pedido" class="w-full btn-primary font-bold py-3 px-4 rounded-lg mt-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+            Realizar Pedido
+        </button>
+    </div>
+</div>
+
+<!-- Notificación Toast -->
+<div id="toast-notification" class="toast fixed bottom-5 left-1/2 -translate-x-1/2 bg-red-500 text-white py-2 px-5 rounded-full shadow-lg opacity-0 transform translate-y-10">
+    <!-- Mensaje dinámico aquí -->
+</div>
+
+<!-- Supabase SDK -->
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // --- IMPORTANTE ---
+    // Pega aquí tu URL y tu clave anónima de Supabase
+    const SUPABASE_URL = 'https://cajscvluvmwlllyrrgeb.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhanNjdmx1dm13bGxseXJyZ2ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NjU0MDksImV4cCI6MjA3MTE0MTQwOX0.7R8igId24CLfVfDVjy_Q0V1pzy_z_bpxLU933-72_sI';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Función para mostrar las opiniones
+    const btnVerOpiniones = document.getElementById('ver-opiniones-btn');
+    const opinionesContenedor = document.getElementById('opiniones-contenedor');
+
+    async function mostrarOpiniones() {
+        const { data: opiniones, error } = await supabase
+            .from('opiniones')
+            .select(`
+                    *,
+                    respuestas ( * )
+                `)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error("Error al obtener opiniones:", error);
+            return;
+        }
+
+        opinionesContenedor.innerHTML = '';
+
+        if (!opiniones || opiniones.length === 0) {
+            opinionesContenedor.innerHTML = '<p class="text-center text-gray-500">Aún no hay opiniones. ¡Sé el primero!</p>';
+            btnVerOpiniones.textContent = 'Ver Opiniones (0)';
+            return;
+        }
+
+        const textoBoton = document.getElementById('opiniones-wrapper').classList.contains('open') ? 'Ocultar' : 'Ver';
+        btnVerOpiniones.textContent = `${textoBoton} ${opiniones.length} Opiniones`;
+
+        opiniones.forEach(opinion => {
+            const estrellasHTML = '★'.repeat(opinion.rating) + '☆'.repeat(5 - opinion.rating);
+
+            const tarjeta = document.createElement('div');
+            tarjeta.className = 'bg-white p-4 rounded-lg shadow-sm border-l-4 border-pink-300';
+            tarjeta.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <p class="font-bold bakesuki-brand-text">${opinion.nombre}</p>
+                        <div class="text-yellow-400 text-lg">${estrellasHTML}</div>
+                    </div>
+                    <p class="text-gray-600 mt-2">${opinion.mensaje || ''}</p>
+                    <div class="mt-4">
+                        <button data-id="${opinion.id}" class="responder-btn text-sm font-semibold text-pink-500 hover:underline">Responder</button>
+                        <button data-id="${opinion.id}" class="ver-respuestas-btn text-sm font-semibold text-gray-500 hover:underline ml-4 ${opinion.respuestas.length > 0 ? '' : 'hidden'}">Ver ${opinion.respuestas.length} Respuestas</button>
+                    </div>
+                    <div id="respuestas-wrapper-${opinion.id}" class="collapsible-wrapper">
+                        <div id="respuestas-contenedor-${opinion.id}" class="mt-4 pl-4 border-l-2 border-gray-200 space-y-3">
+                            ${opinion.respuestas.map(respuesta => `
+                                <div class="respuesta-card p-3 rounded-md">
+                                    <p class="font-bold bakesuki-brand-text">${respuesta.nombre}</p>
+                                    <p class="text-gray-600 text-sm">${respuesta.mensaje}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div id="formulario-respuesta-wrapper-${opinion.id}" class="collapsible-wrapper mt-2">
+                        <form class="formulario-respuesta" data-id="${opinion.id}">
+                            <input type="text" name="nombre" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500 text-sm" placeholder="Tu Nombre">
+                            <textarea name="mensaje" rows="2" class="mt-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500 text-sm" placeholder="Escribe tu respuesta..."></textarea>
+                            <button type="submit" class="mt-2 btn-primary text-sm font-bold py-1 px-3 rounded-lg">Enviar Respuesta</button>
+                        </form>
+                    </div>
+                `;
+            opinionesContenedor.appendChild(tarjeta);
+        });
+    }
+
+    // Manejar el envío del formulario de opinión
+    const formularioOpinion = document.getElementById('formulario-opinion');
+    const formularioWrapper = document.getElementById('formulario-wrapper');
+    const btnEnviarOpinion = document.getElementById('enviar-opinion-btn');
+
+    formularioOpinion.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        btnEnviarOpinion.disabled = true;
+        btnEnviarOpinion.textContent = 'Enviando...';
+
+        const nombre = formularioOpinion.nombre.value;
+        const rating = formularioOpinion.rating.value;
+        const mensaje = formularioOpinion.mensaje.value;
+
+        if (!nombre || !rating) {
+            alert('Por favor, completa tu nombre y la calificación.');
+            btnEnviarOpinion.disabled = false;
+            btnEnviarOpinion.textContent = 'Enviar Comentario';
+            return;
+        }
+
+        const { error } = await supabase.from('opiniones').insert([{ nombre, rating, mensaje }]);
+
+        if (error) {
+            console.error("Error al añadir opinión: ", error);
+            alert('Hubo un error al enviar tu opinión. Inténtalo de nuevo.');
+            btnEnviarOpinion.disabled = false;
+            btnEnviarOpinion.textContent = 'Enviar Comentario';
+        } else {
+            formularioOpinion.reset();
+            btnEnviarOpinion.textContent = '¡Comentario Enviado! ✅';
+            setTimeout(() => {
+                formularioWrapper.classList.remove('open');
+                btnEnviarOpinion.disabled = false;
+                btnEnviarOpinion.textContent = 'Enviar Comentario';
+            }, 2000);
+        }
+    });
+
+    // Eventos para los botones desplegables
+    const opinionesWrapper = document.getElementById('opiniones-wrapper');
+    const btnDejarOpinion = document.getElementById('dejar-opinion-btn');
+
+    btnDejarOpinion.addEventListener('click', () => {
+        formularioWrapper.classList.toggle('open');
+    });
+
+    btnVerOpiniones.addEventListener('click', () => {
+        opinionesWrapper.classList.toggle('open');
+        const textoActual = btnVerOpiniones.textContent;
+        if (opinionesWrapper.classList.contains('open')) {
+            btnVerOpiniones.textContent = textoActual.replace('Ver', 'Ocultar');
+        } else {
+            btnVerOpiniones.textContent = textoActual.replace('Ocultar', 'Ver');
+        }
+    });
+
+    // Eventos para responder y ver respuestas (delegados)
+    opinionesContenedor.addEventListener('click', (e) => {
+        const target = e.target;
+        const opinionId = target.dataset.id;
+        if (!opinionId) return;
+
+        if (target.classList.contains('responder-btn')) {
+            document.getElementById(`formulario-respuesta-wrapper-${opinionId}`).classList.toggle('open');
+        }
+
+        if (target.classList.contains('ver-respuestas-btn')) {
+            const wrapper = document.getElementById(`respuestas-wrapper-${opinionId}`);
+            wrapper.classList.toggle('open');
+            if(wrapper.classList.contains('open')) {
+                target.textContent = target.textContent.replace('Ver', 'Ocultar');
+            } else {
+                target.textContent = target.textContent.replace('Ocultar', 'Ver');
+            }
+        }
+    });
+
+    opinionesContenedor.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!e.target.classList.contains('formulario-respuesta')) return;
+
+        const form = e.target;
+        const submitButton = form.querySelector('button[type="submit"]');
+        const opinionId = form.dataset.id;
+        const nombre = form.nombre.value;
+        const mensaje = form.mensaje.value;
+
+        if (!nombre || !mensaje) {
+            alert('Por favor, completa tu nombre y el mensaje.');
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = 'Enviando...';
+
+        const { error } = await supabase.from('respuestas').insert([{ opinion_id: opinionId, nombre, mensaje }]);
+
+        if (error) {
+            console.error("Error al enviar respuesta:", error);
+            alert('Hubo un error al enviar tu respuesta.');
+            submitButton.disabled = false;
+            submitButton.textContent = 'Enviar Respuesta';
+        } else {
+            form.reset();
+            submitButton.textContent = '¡Enviada! ✅';
+            setTimeout(() => {
+                document.getElementById(`formulario-respuesta-wrapper-${opinionId}`).classList.remove('open');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Enviar Respuesta';
+            }, 2000);
+        }
+    });
+
+    // Cargar productos desde Supabase
+    async function cargarProductos() {
+        const { data, error } = await supabase.from('productos').select('*');
+        if (error) {
+            console.error("Error al obtener productos:", error);
+            document.getElementById('productos-contenedor').innerHTML = '<p class="text-center text-red-500">Error al cargar los productos. Intenta recargar la página.</p>';
+        } else {
+            if (window.renderizarProductos) {
+                window.renderizarProductos(data);
+            }
+        }
+    }
+
+    // Cargar datos iniciales
+    cargarProductos();
+    mostrarOpiniones();
+
+    // Escuchar cambios en tiempo real para opiniones y respuestas
+    supabase.channel('public:opiniones')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'opiniones' }, mostrarOpiniones)
+        .subscribe();
+
+    supabase.channel('public:respuestas')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'respuestas' }, mostrarOpiniones)
+        .subscribe();
+
+    // Escuchar cambios en el stock de productos
+    supabase.channel('public:productos')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'productos' }, cargarProductos)
+        .subscribe();
+
+    // Hacer la función de enviar pedido accesible globalmente
+    window.supabase = supabase;
+
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- VARIABLES GLOBALES ---
+        let productos = []; // Se llenará desde Supabase
+        let carrito = {}; // Objeto para almacenar los productos: { id: cantidad }
+
+        // --- VARIABLES Y ELEMENTOS DEL DOM ---
+        const contenedorProductos = document.getElementById('productos-contenedor');
+        const iconoCarrito = document.getElementById('carrito-icono');
+        const contadorCarrito = document.getElementById('carrito-contador');
+        const modalCarrito = document.getElementById('carrito-modal');
+        const contenidoModal = document.getElementById('modal-contenido');
+        const btnCerrarModal = document.getElementById('cerrar-modal');
+        const itemsCarritoDiv = document.getElementById('carrito-items');
+        const totalCarritoSpan = document.getElementById('carrito-total');
+        const btnRealizarPedido = document.getElementById('realizar-pedido');
+        const divCarritoVacio = document.getElementById('carrito-vacio');
+        const toastNotification = document.getElementById('toast-notification');
+
+        // --- FUNCIONES ---
+
+        // Función para mostrar la notificación
+        const mostrarToast = (mensaje) => {
+            toastNotification.textContent = mensaje;
+            toastNotification.classList.remove('opacity-0', 'translate-y-10');
+            setTimeout(() => {
+                toastNotification.classList.add('opacity-0', 'translate-y-10');
+            }, 2000); // La notificación desaparece después de 2 segundos
+        };
+
+        // Función para formatear el precio a moneda local (Guaraníes)
+        const formatearPrecio = (valor) => {
+            return new Intl.NumberFormat('es-PY', { style: 'currency', currency: 'PYG', maximumFractionDigits: 0 }).format(valor);
+        };
+
+        // Función para renderizar los productos en la página
+        window.renderizarProductos = (productosDesdeDB) => {
+            productos = productosDesdeDB; // Actualizar la variable global
+            contenedorProductos.innerHTML = '';
+            productos.forEach(producto => {
+                const enStock = producto.stock > 0;
+
+                const imagenClasses = `w-full h-56 object-cover ${!enStock ? 'grayscale' : ''}`;
+
+                const controlesCompraHTML = enStock ? `
+                        <p class="text-2xl font-semibold bakesuki-brand-text my-4">${formatearPrecio(producto.precio)}</p>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div class="flex items-center border border-gray-300 rounded-lg">
+                                <button class="cantidad-btn p-2" data-accion="restar" data-id="${producto.id}">-</button>
+                                <input type="number" id="cantidad-${producto.id}" value="1" min="1" class="w-12 text-center font-bold border-none focus:ring-0">
+                                <button class="cantidad-btn p-2" data-accion="sumar" data-id="${producto.id}">+</button>
+                            </div>
+                            <button class="anadir-carrito-btn btn-primary font-bold py-2 px-4 rounded-lg" data-id="${producto.id}">
+                                Añadir
+                            </button>
+                        </div>
+                    ` : `
+                        <p class="text-2xl font-semibold text-gray-400 my-4">${formatearPrecio(producto.precio)}</p>
+                        <div class="mt-auto">
+                            <button disabled class="w-full bg-gray-300 text-gray-500 font-bold py-3 px-4 rounded-lg cursor-not-allowed">
+                                Agotado
+                            </button>
+                        </div>
+                    `;
+
+                const tarjeta = `
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
+                            <div class="relative">
+                                <img src="${producto.imagen}" alt="Imagen de ${producto.nombre}" class="${imagenClasses}"
+                                     onerror="this.onerror=null;this.src='https://placehold.co/400x224/F9EBE4/6D2828?text=${producto.nombre.replace(/ /g,'+')}';">
+                                ${!enStock ? `<div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"><span class="text-white text-2xl font-bold">AGOTADO</span></div>` : ''}
+                            </div>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h3 class="text-2xl font-bold bakesuki-brand-text">${producto.nombre}</h3>
+                                <p class="text-gray-600 mt-2 flex-grow">${producto.descripcion}</p>
+                                ${controlesCompraHTML}
+                            </div>
+                        </div>
+                    `;
+                contenedorProductos.innerHTML += tarjeta;
+            });
+        };
+
+        // Función para actualizar la vista del carrito (modal y contador)
+        const actualizarVistaCarrito = () => {
+            itemsCarritoDiv.innerHTML = '';
+            let total = 0;
+            let totalItems = 0;
+            const idsProductosEnCarrito = Object.keys(carrito);
+
+            if (idsProductosEnCarrito.length === 0) {
+                divCarritoVacio.style.display = 'block';
+                itemsCarritoDiv.style.display = 'none';
+                btnRealizarPedido.disabled = true;
+            } else {
+                divCarritoVacio.style.display = 'none';
+                itemsCarritoDiv.style.display = 'block';
+                btnRealizarPedido.disabled = false;
+                idsProductosEnCarrito.forEach(id => {
+                    const producto = productos.find(p => p.id === id);
+                    if (!producto) return; // Si el producto no existe, saltar
+                    const cantidad = carrito[id];
+                    total += producto.precio * cantidad;
+                    totalItems += cantidad;
+
+                    // Lógica para mostrar el basurero o el signo de menos
+                    const decreaseButtonContent = cantidad > 1
+                        ? '-'
+                        : `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
+
+                    const itemHTML = `
+                            <div class="flex justify-between items-center text-sm font-mono">
+                                <!-- Nombre (scrollable) y Precio -->
+                                <div class="flex-grow pr-4 overflow-hidden">
+                                    <p class="font-bold cart-item-name">${producto.nombre}</p>
+                                    <p class="text-xs text-gray-500">${formatearPrecio(producto.precio * cantidad)}</p>
+                                </div>
+
+                                <!-- Controles de cantidad -->
+                                <div class="quantity-control flex-shrink-0">
+                                    <button data-id="${id}" data-accion="restar" class="quantity-btn text-lg">${decreaseButtonContent}</button>
+                                    <span class="quantity-display">${cantidad}</span>
+                                    <button data-id="${id}" data-accion="sumar" class="quantity-btn text-lg">+</button>
+                                </div>
+                            </div>
+                        `;
+                    itemsCarritoDiv.innerHTML += itemHTML;
+                });
+            }
+
+            totalCarritoSpan.textContent = formatearPrecio(total);
+
+            if (totalItems > 0) {
+                contadorCarrito.textContent = totalItems;
+                contadorCarrito.classList.remove('hidden');
+            } else {
+                contadorCarrito.classList.add('hidden');
+            }
+        };
+
+        // Función para añadir un producto al carrito
+        const agregarAlCarrito = (id, cantidad) => {
+            const producto = productos.find(p => p.id === id);
+            const cantidadEnCarrito = carrito[id] || 0;
+
+            if (cantidadEnCarrito + cantidad > producto.stock) {
+                mostrarToast(`¡Solo quedan ${producto.stock} en stock! 😥`);
+                return;
+            }
+
+            if (carrito[id]) {
+                carrito[id] += cantidad;
+            } else {
+                carrito[id] = cantidad;
+            }
+            // Animación al añadir
+            document.getElementById('carrito-icono').classList.add('pop-animation');
+            setTimeout(() => {
+                document.getElementById('carrito-icono').classList.remove('pop-animation');
+            }, 300);
+            actualizarVistaCarrito();
+            mostrarToast('¡Añadido al carrito! ✅');
+        };
+
+        // Función para guardar el pedido en Supabase y enviar a WhatsApp
+        const guardarYEnviarPedido = async () => {
+            const nombreCliente = document.getElementById('nombre-cliente').value;
+            if (!nombreCliente) {
+                alert('Por favor, ingresa tu nombre para el pedido.');
+                return;
+            }
+
+            const metodoPagoSeleccionado = document.querySelector('input[name="metodo-pago"]:checked').value;
+            let total = 0;
+            let mensajeWhatsApp = `¡Hola Bakesuki! 👋 Pedido a nombre de *${nombreCliente}*:\n\n`;
+
+            const productosDetalle = [];
+
+            Object.keys(carrito).forEach(id => {
+                const producto = productos.find(p => p.id === id);
+                if (!producto) return;
+                const cantidad = carrito[id];
+
+                productosDetalle.push({ // Para la boleta en la DB
+                    id_producto: producto.id,
+                    nombre: producto.nombre,
+                    cantidad: cantidad,
+                    precio_unitario: producto.precio
+                });
+
+                total += producto.precio * cantidad;
+                mensajeWhatsApp += `*${cantidad}x* - ${producto.nombre}\n`;
+            });
+
+            mensajeWhatsApp += `\n*Total a pagar: ${formatearPrecio(total)}*`;
+            mensajeWhatsApp += `\n*Método de Pago: ${metodoPagoSeleccionado}*`;
+
+            // Guardar en Supabase
+            const { error } = await window.supabase.from('pedidos').insert([{
+                nombre_cliente: nombreCliente,
+                productos_detalle: productosDetalle,
+                total: total,
+                metodo_pago: metodoPagoSeleccionado,
+                confirmado: false
+            }]);
+
+            if (error) {
+                console.error('Error al guardar el pedido:', error);
+                alert('Hubo un error al procesar tu pedido. Por favor, intenta de nuevo.');
+            } else {
+                // Si se guarda correctamente, enviar a WhatsApp y limpiar
+                const numeroTelefono = '595991894860';
+                const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroTelefono}&text=${encodeURIComponent(mensajeWhatsApp)}`;
+                window.location.href = urlWhatsApp;
+
+                carrito = {};
+                actualizarVistaCarrito();
+                cerrarModal();
+            }
+        };
+
+        // --- MANEJO DE EVENTOS ---
+
+        // Eventos para añadir al carrito y cambiar cantidad en la página principal
+        contenedorProductos.addEventListener('click', (e) => {
+            const target = e.target;
+
+            if (target.classList.contains('anadir-carrito-btn')) {
+                const id = target.dataset.id;
+                const inputCantidad = document.getElementById(`cantidad-${id}`);
+                const cantidad = parseInt(inputCantidad.value);
+                if (cantidad > 0) {
+                    agregarAlCarrito(id, cantidad);
+                    inputCantidad.value = 1;
+                }
+            }
+
+            if (target.classList.contains('cantidad-btn')) {
+                const id = target.dataset.id;
+                const accion = target.dataset.accion;
+                const inputCantidad = document.getElementById(`cantidad-${id}`);
+                let valorActual = parseInt(inputCantidad.value);
+
+                if (accion === 'sumar') {
+                    inputCantidad.value = valorActual + 1;
+                } else if (accion === 'restar' && valorActual > 1) {
+                    inputCantidad.value = valorActual - 1;
+                }
+            }
+        });
+
+        // Eventos para editar el pedido desde el carrito
+        itemsCarritoDiv.addEventListener('click', (e) => {
+            const target = e.target.closest('button');
+            if (!target) return;
+
+            const id = target.dataset.id;
+            const accion = target.dataset.accion;
+
+            if (accion === 'sumar') {
+                const producto = productos.find(p => p.id === id);
+                const cantidadEnCarrito = carrito[id] || 0;
+                if (cantidadEnCarrito + 1 > producto.stock) {
+                    mostrarToast(`¡Solo quedan ${producto.stock} en stock! 😥`);
+                    return;
+                }
+                carrito[id]++;
+            } else if (accion === 'restar') {
+                carrito[id]--;
+                if (carrito[id] === 0) {
+                    delete carrito[id];
+                }
+            }
+
+            actualizarVistaCarrito();
+        });
+
+
+        // Abrir y cerrar el modal del carrito
+        const abrirModal = () => {
+            modalCarrito.classList.remove('hidden');
+            setTimeout(() => {
+                contenidoModal.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        };
+
+        const cerrarModal = () => {
+            contenidoModal.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modalCarrito.classList.add('hidden');
+            }, 300);
+        };
+
+        iconoCarrito.addEventListener('click', abrirModal);
+        btnCerrarModal.addEventListener('click', cerrarModal);
+        modalCarrito.addEventListener('click', (e) => {
+            if (e.target === modalCarrito) {
+                cerrarModal();
+            }
+        });
+
+        // Botón de realizar pedido
+        btnRealizarPedido.addEventListener('click', guardarYEnviarPedido);
+
+        // --- INICIALIZACIÓN ---
+        // La renderización de productos ahora se llama desde el script de Supabase
+        // cuando los datos están listos.
+        actualizarVistaCarrito();
+    });
+</script>
+
+</body>
+</html>
