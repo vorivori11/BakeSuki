@@ -335,6 +335,7 @@
     // Pega aquí tu URL y tu clave anónima de Supabase
     const SUPABASE_URL = 'https://cajscvluvmwlllyrrgeb.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhanNjdmx1dm13bGxseXJyZ2ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NjU0MDksImV4cCI6MjA3MTE0MTQwOX0.7R8igId24CLfVfDVjy_Q0V1pzy_z_bpxLU933-72_sI';
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // Función para mostrar las opiniones
@@ -519,7 +520,7 @@
 
     // Cargar productos desde Supabase
     async function cargarProductos() {
-        const { data, error } = await supabase.from('productos').select('*');
+        const { data, error } = await supabase.from('productos').select('*').eq('habilitado', true);
         if (error) {
             console.error("Error al obtener productos:", error);
             document.getElementById('productos-contenedor').innerHTML = '<p class="text-center text-red-500">Error al cargar los productos. Intenta recargar la página.</p>';
